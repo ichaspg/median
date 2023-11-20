@@ -1,14 +1,9 @@
 // prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-
-// initialize the Prisma Client
 const prisma = new PrismaClient();
-
 const roundsOfHashing = 10;
-
 async function main() {
-  // create two dummy users
   const passwordSabin = await bcrypt.hash('password-sabin', roundsOfHashing);
   const passwordAlex = await bcrypt.hash('password-alex', roundsOfHashing);
 
@@ -35,10 +30,4 @@ async function main() {
       password: passwordAlex,
     },
   });
-
-  // create three dummy posts
-  // ...
 }
-
-// execute the main function
-// ...

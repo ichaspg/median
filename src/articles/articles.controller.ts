@@ -31,8 +31,22 @@ export class ArticlesController {
   @Get()
   @ApiOkResponse({ type: ArticleEntity, isArray: true })
   async findAll() {
-    const articles = await this.articlesService.findAll();
-    return articles.map((article) => new ArticleEntity(article));
+    try {
+      const articles = await this.articlesService.findAll();
+      return {
+        status: 'success',
+        data: {
+          articles: articles.map((article) => new ArticleEntity(article)),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Get('drafts')
@@ -45,7 +59,32 @@ export class ArticlesController {
   @Get(':id')
   @ApiOkResponse({ type: ArticleEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return new ArticleEntity(await this.articlesService.findOne(id));
+    try {
+      const article = await this.articlesService.findOne(id);
+
+      if (!article) {
+        return {
+          status: 'fail',
+          data: {
+            meessage: 'Article not Found',
+          },
+        };
+      }
+
+      return {
+        status: 'success',
+        data: {
+          article: new ArticleEntity(article),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Patch(':id')
@@ -54,14 +93,60 @@ export class ArticlesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
-    return new ArticleEntity(
-      await this.articlesService.update(id, updateArticleDto),
-    );
+    try {
+      const updatedArticle = await this.articlesService.update(
+        id,
+        updateArticleDto,
+      );
+      if (!updatedArticle) {
+        return {
+          staus: 'fail',
+          data: {
+            massage: 'Article not Found',
+          },
+        };
+      }
+      return {
+        status: 'success',
+        data: new ArticleEntity(updatedArticle),
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Delete(':id')
   @ApiOkResponse({ type: ArticleEntity })
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return new ArticleEntity(await this.articlesService.remove(id));
+    try {
+      const deletedArticle = await this.articlesService.remove(id);
+      if (!deletedArticle) {
+        return {
+          status: 'fail',
+          data: {
+            message: 'Article not Found',
+          },
+        };
+      }
+
+      return {
+        status: 'success',
+        data: {
+          article: new ArticleEntity(deletedArticle),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 }

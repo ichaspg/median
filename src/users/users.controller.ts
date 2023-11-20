@@ -31,7 +31,22 @@ export class UsersController {
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
   async create(@Body() createUserDto: CreateUserDto) {
-    return new UserEntity(await this.usersService.create(createUserDto));
+    try {
+      const createdUser = await this.usersService.create(createUserDto);
+      return {
+        status: 'success',
+        data: {
+          user: new UserEntity(createdUser),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Get()
@@ -39,8 +54,22 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity, isArray: true })
   async findAll() {
-    const users = await this.usersService.findAll();
-    return users.map((user) => new UserEntity(user));
+    try {
+      const users = await this.usersService.findAll();
+      return {
+        status: 'success',
+        data: {
+          users: users.map((user) => new UserEntity(user)),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Get(':id')
@@ -48,7 +77,30 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return new UserEntity(await this.usersService.findOne(id));
+    try {
+      const user = await this.usersService.findOne(id);
+      if (!user) {
+        return {
+          status: 'fail',
+          data: {
+            message: 'User not Found',
+          },
+        };
+      }
+      return {
+        status: 'success',
+        data: {
+          user: new UserEntity(user),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Service Error',
+        },
+      };
+    }
   }
 
   @Patch(':id')
@@ -59,7 +111,32 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return new UserEntity(await this.usersService.update(id, updateUserDto));
+    try {
+      const updatedUser = await this.usersService.update(id, updateUserDto);
+
+      if (!updatedUser) {
+        return {
+          status: 'fail',
+          data: {
+            message: 'User not found',
+          },
+        };
+      }
+
+      return {
+        status: 'success',
+        data: {
+          user: new UserEntity(updatedUser),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 
   @Delete(':id')
@@ -67,6 +144,31 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return new UserEntity(await this.usersService.remove(id));
+    try {
+      const removedUser = await this.usersService.remove(id);
+
+      if (!removedUser) {
+        return {
+          status: 'fail',
+          data: {
+            message: 'User not found',
+          },
+        };
+      }
+
+      return {
+        status: 'success',
+        data: {
+          user: new UserEntity(removedUser),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: {
+          message: 'Internal Server Error',
+        },
+      };
+    }
   }
 }
